@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var vpnClient = VPNClient()
-    @State private var ipAddress: String = QtBridge.getLastIPAddress() ?? ""
+    @State private var ipAddress: String = ""
 
     var body: some View {
         VStack(spacing: 20) {
@@ -25,12 +25,25 @@ struct ContentView: View {
 
             Text("Статус: \(vpnClient.connectionStatus)")
                 .font(.subheadline)
-
+            Button(action: {
+                print(vpnClient.vpn_back.pointee.getLastIPAddress())
+            }) {
+                Text("Test IP")
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding([.leading, .trailing])
             Spacer()
         }
         .padding()
         .onAppear{
-            ipAddress = QtBridge.getLastIPAddress() ?? ""
+            ipAddress = String(vpnClient.vpn_back.pointee.getLastIPAddress())
+            print(ipAddress)
+            print(vpnClient.vpn_back.pointee.getLastIPPath())
         }
     }
 }

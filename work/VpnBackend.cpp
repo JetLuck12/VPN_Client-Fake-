@@ -1,17 +1,21 @@
 #include "VpnBackend.h"
 #include <fstream>
 #include <filesystem>
+#include "QtCore/QFile"
+#include "QtCore/QTextStream"
+#include "QtCore/QStandardPaths"
 
 VpnBackend::VpnBackend()
 {
-    std::ifstream file(getLastIPPath());
-    std::string ip;
-    
-    if (file.is_open()) {
-        std::getline(file, ip);
+    QString qip;
+    QString path(getLastIPPath().c_str());
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        in >> qip;
         file.close();
     }
-    lastIPAddress = ip;
+    lastIPAddress = qip.toStdString();
 }
 
 VpnBackend& VpnBackend::instance() {
@@ -19,27 +23,31 @@ VpnBackend& VpnBackend::instance() {
     return backend;
 }
 
-void VpnBackend::saveLastIPAddress(const std::string& ip) {
-    lastIPAddress = ip;
-    std::ofstream file(getLastIPPath());
-        if (file.is_open()) {
-            file << ip;
-            file.close();
-        }
-}
-
-std::string VpnBackend::getLastIPAddress() const {
-    std::ifstream file(getLastIPPath());
-        std::string ip;
-        
-        if (file.is_open()) {
-            std::getline(file, ip);
-            file.close();
-        }
-    return lastIPAddress;
+void VpnBackend::saveLastIPAddress(const std::string &ip) {
+    QString qip = QString::fromStdString(ip.c_str());
+    QString path = QString::fromStdString(getLastIPPath());
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << qip;
+        file.close();
+    }
 }
 
 std::string VpnBackend::getLastIPPath() const {
-    std::string path = std::filesystem::temp_directory_path().string() + "/last_ip.txt";
-    return path;
+    return QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toStdString() + "/last_ip.txt";
+}
+
+
+
+std::string VpnBackend::getLastIPAddress() const{
+    QString qip;
+    QString path = QString::fromStdString(getLastIPPath().c_str());
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        qip = in.readAll();
+        file.close();
+    }
+    return qip.toStdString();
 }

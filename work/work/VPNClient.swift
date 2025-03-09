@@ -1,6 +1,7 @@
 import Foundation
 
 class VPNClient: ObservableObject {
+    @Published var vpn_back = VpnBackend.instance()
     @Published var connectionStatus: String = "Отключен"
 
     func toggleConnection(ipAddress: String) {
@@ -14,7 +15,9 @@ class VPNClient: ObservableObject {
     private func connect(to ipAddress: String) {
         connectionStatus = "Подключение..."
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            QtBridge.saveLastIPAddress(ipAddress)
+            self.vpn_back.pointee.saveLastIPAddress(std.string(ipAddress))
+            print(String(self.vpn_back.pointee.getLastIPPath()))
+            print(ipAddress)
             self.connectionStatus = "Подключен"
         }
     }

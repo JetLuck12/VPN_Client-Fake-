@@ -1,12 +1,12 @@
 #ifndef VPNBACKEND_H
 #define VPNBACKEND_H
 
-#include <string>
+#include <QtCore/QString>
 
 class VpnBackend {
 public:
     static VpnBackend& instance();
-    void saveLastIPAddress(const std::string& ip);
+    void saveLastIPAddress(const std::string &ip);
     std::string getLastIPAddress() const;
     std::string getLastIPPath() const;
 private:
